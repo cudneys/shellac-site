@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shellac Cut Calculator</title>
+<style>
+  :root {
+    --bg: #f6efe4;
+    --card: #fffaf2;
+    --ink: #2b1d10;
+    --muted: #7a6650;
+    --line: #e2d3bd;
+    --accent: #b5651d;
+    --accent-ink: #fff;
+    --result-bg: #3a2413;
+    --result-ink: #fbe9cf;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a130d;
+      --card: #251b12;
+      --ink: #f3e6d3;
+      --muted: #b09a80;
+      --line: #40301f;
+      --accent: #e0913f;
+      --accent-ink: #1a130d;
+      --result-bg: #100b07;
+      --result-ink: #fbe9cf;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 32px 16px 48px;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  main { max-width: 560px; margin: 0 auto; }
+  h1 { margin: 0 0 4px; font: 600 2rem/1.2 Georgia, "Times New Roman", serif; }
+  .lede { margin: 0 0 24px; color: var(--muted); }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  label, .label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: .8rem;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .field + .field { margin-top: 20px; }
+  .row { display: flex; gap: 8px; }
+  input, select, button { font: inherit; color: inherit; }
+  input[type="number"], select {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+  select { flex: 0 0 150px; }
+  input:focus-visible, select:focus-visible, button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .presets { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .presets button {
+    padding: 6px 14px;
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .presets button[aria-pressed="true"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
+  .result {
+    background: var(--result-bg);
+    color: var(--result-ink);
+    border-radius: 12px;
+    padding: 24px 20px;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  .result .label { color: inherit; opacity: .7; }
+  .big {
+    font: 600 3rem/1.1 Georgia, "Times New Roman", serif;
+    font-variant-numeric: tabular-nums;
+  }
+  .big small { font-size: 1.25rem; font-weight: 400; }
+  .alt { margin-top: 6px; opacity: .8; font-variant-numeric: tabular-nums; }
+  .summary { margin: 12px 0 0; font-size: .9rem; opacity: .7; }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  th, td { padding: 8px 4px; text-align: right; border-bottom: 1px solid var(--line); }
+  th:first-child, td:first-child { text-align: left; }
+  th { font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  tbody tr:last-child td { border-bottom: 0; }
+  tr.active td { font-weight: 700; color: var(--accent); }
+  .note { margin: 0; font-size: .9rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Shellac Cut Calculator</h1>
+  <p class="lede">How much shellac to dissolve in the alcohol you have.</p>
+
+  <div class="card">
+    <div class="field">
+      <label for="volume">Alcohol volume</label>
+      <div class="row">
+        <input type="number" id="volume" value="8" min="0" step="any" inputmode="decimal">
+        <select id="unit" aria-label="Volume unit">
+          <option value="1">fl oz</option>
+          <option value="8">cups</option>
+          <option value="16">pints</option>
+          <option value="32">quarts</option>
+          <option value="128">gallons</option>
+          <option value="0.033814">mL</option>
+          <option value="33.814">liters</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="cut">Cut (lb of shellac per gallon)</label>
+      <input type="number" id="cut" value="3" min="0" step="any" inputmode="decimal">
+      <div class="presets" id="presets">
+        <button type="button" data-cut="0.5">½ lb</button>
+        <button type="button" data-cut="1">1 lb</button>
+        <button type="button" data-cut="1.5">1½ lb</button>
+        <button type="button" data-cut="2">2 lb</button>
+        <button type="button" data-cut="3">3 lb</button>
+        <button type="button" data-cut="4">4 lb</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="result" aria-live="polite">
+    <div class="label">Shellac needed</div>
+    <div class="big"><span id="oz">3</span> <small>oz</small></div>
+    <div class="alt"><span id="grams">85 g</span> &middot; <span id="lbs">0.19 lb</span></div>
+    <p class="summary" id="summary"></p>
+  </div>
+
+  <div class="card">
+    <div class="label">Other cuts for this volume</div>
+    <table>
+      <thead><tr><th>Cut</th><th>Ounces</th><th>Grams</th></tr></thead>
+      <tbody id="table"></tbody>
+    </table>
+  </div>
+
+  <p class="note">A cut is pounds of shellac per gallon of alcohol, so ounces of shellac
+  = cut &times; fluid ounces of alcohol &divide; 8. Shellac is measured by weight, alcohol by volume.</p>
+</main>
+
+<script>
+  const OZ_PER_GALLON = 128;
+  const OZ_PER_LB = 16;
+  const GRAMS_PER_OZ = 28.3495;
+  const TABLE_CUTS = [0.5, 1, 1.5, 2, 2.5, 3, 4, 5];
+
+  const volumeEl = document.getElementById('volume');
+  const unitEl = document.getElementById('unit');
+  const cutEl = document.getElementById('cut');
+  const presetButtons = document.querySelectorAll('#presets button');
+
+  // Weight of shellac in ounces for a given cut and alcohol volume in fluid ounces.
+  function shellacOz(cut, alcoholFlOz) {
+    return cut * OZ_PER_LB * alcoholFlOz / OZ_PER_GALLON;
+  }
+
+  function fmt(n, places) {
+    return n.toLocaleString(undefined, { maximumFractionDigits: places });
+  }
+
+  function fmtGrams(oz) {
+    const g = oz * GRAMS_PER_OZ;
+    return g >= 1000 ? fmt(g / 1000, 2) + ' kg' : fmt(g, g < 10 ? 1 : 0) + ' g';
+  }
+
+  function update() {
+    const volume = Math.max(0, parseFloat(volumeEl.value) || 0);
+    const cut = Math.max(0, parseFloat(cutEl.value) || 0);
+    const alcoholFlOz = volume * parseFloat(unitEl.value);
+    const oz = shellacOz(cut, alcoholFlOz);
+
+    document.getElementById('oz').textContent = fmt(oz, 2);
+    document.getElementById('grams').textContent = fmtGrams(oz);
+    document.getElementById('lbs').textContent = fmt(oz / OZ_PER_LB, 2) + ' lb';
+    document.getElementById('summary').textContent =
+      fmt(cut, 2) + ' lb cut in ' + fmt(volume, 2) + ' ' + unitEl.selectedOptions[0].text + ' of alcohol';
+
+    presetButtons.forEach(b =>
+      b.setAttribute('aria-pressed', String(parseFloat(b.dataset.cut) === cut)));
+
+    document.getElementById('table').innerHTML = TABLE_CUTS.map(c => {
+      const o = shellacOz(c, alcoholFlOz);
+      return '<tr' + (c === cut ? ' class="active"' : '') + '><td>' + c + ' lb</td><td>' +
+        fmt(o, 2) + ' oz</td><td>' + fmtGrams(o) + '</td></tr>';
+    }).join('');
+  }
+
+  presetButtons.forEach(b => b.addEventListener('click', () => {
+    cutEl.value = b.dataset.cut;
+    update();
+  }));
+  [volumeEl, unitEl, cutEl].forEach(el => el.addEventListener('input', update));
+  update();
+</script>
+</body>
+</html>
