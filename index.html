@@ -129,6 +129,8 @@
   tbody tr:last-child td { border-bottom: 0; }
   tr.active td { font-weight: 700; color: var(--accent); }
   .note { margin: 0; font-size: .9rem; color: var(--muted); }
+  .site-footer { margin: 32px auto 0; font-size: .85rem; color: var(--muted); text-align: center; }
+  .site-footer p { margin: 0; }
 </style>
 </head>
 <body>
@@ -195,6 +197,23 @@
   <p class="note">A cut is pounds of shellac per gallon of alcohol, so ounces of shellac
   = cut &times; fluid ounces of alcohol &divide; 8. Shellac is measured by weight, alcohol by volume.</p>
 </main>
+
+<footer class="site-footer">
+  <p>&copy; <span id="year">2026</span> Scott's Tools</p>
+  <p id="sponsor"></p>
+</footer>
+
+<script>
+  {
+    const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const MAX_NUMBER = 10;
+    const pick = n => Math.floor(Math.random() * n);
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+    document.getElementById('sponsor').textContent = 'This site has been brought to you by the ' +
+      (pick(2) ? 'letter ' + LETTERS[pick(LETTERS.length)] : 'number ' + (pick(MAX_NUMBER) + 1)) + '.';
+  }
+</script>
 
 <script>
   const OZ_PER_GALLON = 128;
